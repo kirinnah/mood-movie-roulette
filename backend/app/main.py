@@ -18,7 +18,6 @@ from app.movies.api.v1.router import router as movies_router
 from app.movies.clients.imdb import ImdbClient
 from app.users.api.v1.router import router as users_router
 
-
 STATUS_BY_ERROR: dict[type[AppError], int] = {
     NotFoundError: 404,
     ConflictError: 409,
@@ -55,7 +54,7 @@ def create_app() -> FastAPI:
     app.include_router(api_v1)
 
     @app.get("/health", tags=["service"])
-    async def health():
+    async def health() -> dict[str, str]:
         return {"status": "ok"}
 
     return app
