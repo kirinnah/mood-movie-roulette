@@ -4,21 +4,20 @@ from fastapi import Depends, Request
 
 from app.core.config import settings
 from app.core.db.session import SessionDep
-from app.movies.clients.imdb import ImdbClient
 from app.movies.repositories.movie import MovieRepository
-from app.movies.services.movie import MovieService
+from app.movies.services.movie import MovieProvider, MovieService
 from app.movies.services.roulette import RouletteService
 
 
-def get_imdb_client(request: Request) -> ImdbClient:
-    return request.app.state.imdb_client
+def get_movie_client(request: Request) -> MovieProvider:
+    return request.app.state.movie_client
 
 
-ImdbClientDep = Annotated[ImdbClient, Depends(get_imdb_client)]
+MovieClientDep = Annotated[MovieProvider, Depends(get_movie_client)]
 
 
-def get_movie_service(session: SessionDep, imdb: ImdbClientDep) -> MovieService:
-    return MovieService(MovieRepository(session), imdb, settings.cache_ttl_days)
+def get_movie_service(session: SessionDep, client: MovieClientDep) -> MovieService:
+    return MovieService(MovieRepository(session), client, settings.cache_ttl_days)
 
 
 MovieServiceDep = Annotated[MovieService, Depends(get_movie_service)]

@@ -15,7 +15,7 @@ from app.core.exceptions import (
 )
 from app.favorites.api.v1.router import router as favorites_router
 from app.movies.api.v1.router import router as movies_router
-from app.movies.clients.imdb import ImdbClient
+from app.movies.clients import create_movie_client
 from app.users.api.v1.router import router as users_router
 
 STATUS_BY_ERROR: dict[type[AppError], int] = {
@@ -28,9 +28,9 @@ STATUS_BY_ERROR: dict[type[AppError], int] = {
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.imdb_client = ImdbClient(settings.imdb_api_base, settings.imdb_timeout)
+    app.state.movie_client = create_movie_client()
     yield
-    await app.state.imdb_client.aclose()
+    await app.state.movie_client.aclose()
     await engine.dispose()
 
 

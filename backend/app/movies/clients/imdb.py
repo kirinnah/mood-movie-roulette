@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import httpx
@@ -17,26 +18,41 @@ def _year(value: object) -> int | None:
 
 def _float(value: object) -> float | None:
     try:
-        return float(value) 
+        return float(value)  # type: ignore[arg-type]
     except (TypeError, ValueError):
         return None
 
 
 class ImdbClient:
-    def __init__(self, base_url: str, timeout: float = 10.0) -> None:
-        self._http = httpx.AsyncClient(base_url=base_url, timeout=timeout)
+    def __init__(
+        self,
+        base_url: str,
+        timeout: float = 5.0,
+        retries: int = 3,
+        backoff: float = 0.4,
+        transport: httpx.AsyncBaseTransport | None = None,
+    ) -> None:
+        self._http = httpx.AsyncClient(base_url=base_url, timeout=timeout, transport=transport)
+        self._retries = retries
+        self._backoff = backoff
 
     async def aclose(self) -> None:
         await self._http.aclose()
 
     async def _get(self, params: dict[str, str]) -> dict:
-        try:
-            resp = await self._http.get("/search", params=params)
-            resp.raise_for_status()
-            return resp.json()
-        except (httpx.HTTPError, ValueError) as exc:
-            log.warning("IMDb API error: %s", exc)
-            raise UpstreamError("IMDb API недоступен") from exc
+        """Публичный IMDbOT нестабилен, поэтому сбои (сеть, таймаут, HTTP-ошибка, битый JSON) повторяем."""
+        last_exc: Exception | None = None
+        for attempt in range(1, self._retries + 1):
+            try:
+                resp = await self._http.get("/search", params=params)
+                resp.raise_for_status()
+                return resp.json()
+            except (httpx.HTTPError, ValueError) as exc:
+                last_exc = exc
+                log.warning("IMDb API error (attempt %s/%s): %s", attempt, self._retries, exc)
+                if attempt < self._retries:
+                    await asyncio.sleep(self._backoff * attempt)
+        raise UpstreamError("IMDb API недоступен") from last_exc
 
     async def get_movie(self, imdb_id: str) -> ImdbMovie:
         short = (await self._get({"tt": imdb_id})).get("short") or {}

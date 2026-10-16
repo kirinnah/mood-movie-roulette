@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -8,8 +10,11 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://roulette:roulette@localhost:5432/roulette"
     cors_origins: list[str] = ["*"]
 
+    movie_provider: Literal["imdbot", "omdb"] = "imdbot"
     imdb_api_base: str = "https://imdb.iamidiotareyoutoo.com"
-    imdb_timeout: float = 10.0
+    imdb_timeout: float = 5.0
+    omdb_api_key: str = ""
+    omdb_api_base: str = "https://www.omdbapi.com"
     cache_ttl_days: int = 30
 
     jwt_secret: str = "dev-secret-change-me-in-production-0123456789"
