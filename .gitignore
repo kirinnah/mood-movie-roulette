@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# сырые ответы API от scripts/check_imdb.py
+imdb_sample_*.json
