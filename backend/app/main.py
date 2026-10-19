@@ -1,11 +1,13 @@
 from contextlib import asynccontextmanager
 
-from fastapi import APIRouter, FastAPI, Request
+from fastapi import APIRouter, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.core.config import settings
-from app.core.db.session import engine
+from app.core.db.session import SessionDep, engine
 from app.core.exceptions import (
     AppError,
     ConflictError,
@@ -28,6 +30,7 @@ STATUS_BY_ERROR: dict[type[AppError], int] = {
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    settings.validate_runtime()
     app.state.movie_client = create_movie_client()
     yield
     await app.state.movie_client.aclose()
@@ -54,8 +57,12 @@ def create_app() -> FastAPI:
     app.include_router(api_v1)
 
     @app.get("/health", tags=["service"])
-    async def health() -> dict[str, str]:
-        return {"status": "ok"}
+    async def health(session: SessionDep) -> dict[str, str]:
+        try:
+            await session.execute(text("SELECT 1"))
+        except (SQLAlchemyError, OSError) as exc:
+            raise HTTPException(status_code=503, detail="База данных недоступна") from exc
+        return {"status": "ok", "db": "ok"}
 
     return app
 
