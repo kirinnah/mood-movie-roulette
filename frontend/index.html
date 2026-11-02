@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#141614"><meta name="description" content="Кино под ваше настроение. Крутите рулетку, находите фильмы и сохраняйте любимое.">
+  <title>Кадр — кино по настроению</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css">
+  <script src="config.js"></script><script type="module" src="app.js"></script>
+</head>
+<body>
+  <header class="header wrap">
+    <a class="brand" href="#roulette" aria-label="Кадр — главная"><span class="brand-mark">к.</span>кадр<span class="brand-dot">®</span></a>
+    <nav aria-label="Основная навигация"><a href="#roulette" data-nav="roulette">Рулетка</a><a href="#search" data-nav="search">Поиск</a><a href="#favorites" data-nav="favorites">Избранное <span class="fav-count">0</span></a></nav>
+    <div class="account"><span id="account-email" hidden></span><button id="account-button" class="button small outline">Войти <span aria-hidden="true">↗</span></button></div>
+  </header>
+  <div class="wrap"><div id="connection" class="connection" role="status" hidden><span>Сервер временно недоступен. Проверьте, запущен ли бэкенд.</span><button id="check-health" class="text-button">Повторить ↻</button></div></div>
+  <main class="wrap">
+    <section id="roulette-view" class="view">
+      <div class="hero">
+        <div class="hero-copy"><p class="eyebrow"><span class="live-dot"></span> МЕНЬШЕ ВЫБИРАТЬ. БОЛЬШЕ СМОТРЕТЬ.</p><h1>Как настроение?<br>Такое и <em>кино.</em></h1><p class="lead">Один вечер, тысячи фильмов.<br>Пусть случай выберет тот самый.</p><a class="hero-link" href="#mood-picker">Найти свой фильм <span>↘</span></a></div>
+        <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="art-caption">A LITTLE CHANCE.<br>A GREAT MOVIE.</div><div class="ticket"><div class="ticket-top">КАДР / БИЛЕТ В ВЕЧЕР <span>✳</span></div><div class="ticket-middle"><span>ADMIT<br>ONE</span><div class="reel"><i></i><i></i><i></i><i></i><i></i></div></div><div class="ticket-bottom"><span>РЯД <b>01</b></span><span>МЕСТО <b>ТВОЁ</b></span><span class="barcode"></span></div></div><span class="art-star">✳</span><span class="art-foot">БЕЗ СПОЙЛЕРОВ. С НАСТРОЕНИЕМ.</span></div>
+      </div>
+      <section id="mood-picker" class="picker" aria-labelledby="mood-heading"><div class="section-heading"><div><p class="eyebrow muted">01 / ВЫБЕРИ СОСТОЯНИЕ</p><h2 id="mood-heading">Что чувствуешь сегодня?</h2></div><span class="section-note">Для любого «как-то так»</span></div><div id="moods" class="moods" role="group" aria-label="Настроение"></div>
+        <div class="spin-bar"><div><span id="mood-description">Загружаем настроения…</span><p>Выбирай сердцем. Остальное — дело случая.</p></div><button id="spin" class="button primary" disabled><span aria-hidden="true">⤨</span> Крутить рулетку <span aria-hidden="true">↗</span></button></div>
+        <div id="roulette-message" class="message" role="status" hidden></div><button id="reset-history" class="text-button" hidden>Начать новый круг ↻</button>
+      </section>
+      <section id="result-section" class="result-section" hidden aria-labelledby="result-heading"><div class="section-heading"><div><p class="eyebrow muted">02 / СЛУЧАЙ РЕШИЛ</p><h2 id="result-heading">Твой фильм на сегодня</h2></div><span class="section-note">Попкорн уже ждёт</span></div><div id="roulette-result" aria-live="polite"></div></section>
+      <div class="how"><div><span>01</span><p><b>Поймай настроение</b>От уютного вечера до приключения.</p></div><div><span>02</span><p><b>Доверься случаю</b>Один клик — один подходящий фильм.</p></div><div><span>03</span><p><b>Сохрани на потом</b>Любимые находки будут в избранном.</p></div></div>
+    </section>
+    <section id="search-view" class="view inner-view" hidden><p class="eyebrow muted">КИНО, КОТОРОЕ ТЫ ИЩЕШЬ</p><h1>Есть фильм <em>на примете?</em></h1><p class="lead">Начни с названия — мы найдём остальное.</p><form id="search-form" class="search-form"><label class="sr-only" for="search-query">Название фильма</label><input id="search-query" type="search" minlength="2" maxlength="100" placeholder="Например, Matrix" required><button class="button primary" type="submit">Найти ↗</button></form><p id="search-message" class="message" role="status">Введи хотя бы 2 символа. Оригинальное название поможет найти фильм точнее.</p><div id="search-results" class="movie-grid"></div></section>
+    <section id="favorites-view" class="view inner-view" hidden><p class="eyebrow muted">ТВОЯ ЛИЧНАЯ КОЛЛЕКЦИЯ</p><h1>На хороший <em>вечер.</em></h1><p class="lead">Фильмы, к которым хочется вернуться.</p><div id="favorites-message" class="message" role="status"></div><div id="favorites-results" class="movie-grid"></div><button id="favorites-retry" class="button outline" hidden>Обновить избранное</button><button id="favorites-login" class="button primary" hidden>Войти в аккаунт ↗</button></section>
+  </main>
+  <footer class="wrap footer"><a class="brand" href="#roulette">кадр<span class="brand-dot">®</span></a><span>Хорошее кино начинается с настроения.</span><span class="footer-right">ДАННЫЕ OMDb · СЛУЧАЙНОСТЬ ОТ НАС</span></footer>
+  <dialog id="auth-dialog" aria-labelledby="auth-title"><button class="close" data-close="auth-dialog" aria-label="Закрыть">×</button><p class="eyebrow muted">СОХРАНЯЙ ХОРОШЕЕ</p><h2 id="auth-title">С возвращением.</h2><p id="auth-subtitle">Войди, чтобы собрать свою коллекцию фильмов.</p><form id="auth-form"><label for="email">Электронная почта</label><input id="email" type="email" autocomplete="email" required maxlength="254" placeholder="you@example.com"><label for="password">Пароль</label><div class="password-field"><input id="password" type="password" autocomplete="current-password" required maxlength="72"><button type="button" id="show-password" aria-label="Показать пароль" aria-pressed="false">Показать</button></div><p id="password-hint" class="field-hint" hidden>От 8 до 72 символов.</p><p id="auth-error" class="message error" role="alert" hidden></p><button type="submit" id="auth-submit" class="button primary">Войти ↗</button></form><button id="auth-switch" class="text-button">Нет аккаунта? Зарегистрироваться</button></dialog>
+  <dialog id="movie-dialog" class="movie-dialog" aria-label="Информация о фильме"><button class="close" data-close="movie-dialog" aria-label="Закрыть">×</button><div id="movie-detail"></div></dialog>
+  <div id="toast" role="status" class="toast" hidden></div>
+</body></html>
