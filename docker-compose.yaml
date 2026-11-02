@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:17
+    env_file: ./backend/.env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+    # Порт БД наружу не публикуется. Для отладки с хоста раскомментировать:
+    # ports:
+    #   - "127.0.0.1:5432:5432"
+
+  api:
+    build: ./backend
+    env_file: ./backend/.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      default:
+        # nginx во frontend проксирует на http://backend:8000
+        aliases:
+          - backend
+    healthcheck:
+      # в slim-образе нет curl; urlopen падает на 503, если БД недоступна
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
