@@ -11,9 +11,6 @@ services:
       retries: 10
       start_period: 10s
     restart: unless-stopped
-    # Порт БД наружу не публикуется. Для отладки с хоста раскомментировать:
-    # ports:
-    #   - "127.0.0.1:5432:5432"
 
   api:
     build: ./backend
@@ -25,11 +22,9 @@ services:
         condition: service_healthy
     networks:
       default:
-        # nginx во frontend проксирует на http://backend:8000
         aliases:
           - backend
     healthcheck:
-      # в slim-образе нет curl; urlopen падает на 503, если БД недоступна
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
       interval: 10s
       timeout: 5s
